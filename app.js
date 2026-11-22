@@ -11,7 +11,7 @@ let startingSeat = -1;
 let direction = 0;
 let nextSpeaker = -1;
 let transcript = [];
-let interim = '';
+let sessionParts = [];
 let recognition;
 let retryStartup;
 let finishing = false;
@@ -25,7 +25,7 @@ function notice(message = '') {
 
 function showTranscript() {
   const live = get('live');
-  live.textContent = [...transcript, interim].filter(Boolean).join(' ');
+  live.textContent = [...transcript, ...sessionParts].filter(Boolean).join('\n');
   live.hidden = !live.textContent;
   live.scrollTop = live.scrollHeight;
 }
@@ -103,7 +103,14 @@ function addSummary(name, parts) {
       item.textContent = text;
       list.append(item);
     }
-    row.append(list);
+    const details = document.createElement('details');
+    const label = document.createElement('summary');
+    const full = document.createElement('p');
+    label.textContent = '查看完整转写';
+    full.className = 'full-transcript';
+    full.textContent = parts.join('\n');
+    details.append(label, full);
+    row.append(list, details);
   } else {
     const empty = document.createElement('p');
     empty.textContent = '没有识别到发言。';
@@ -115,9 +122,9 @@ function addSummary(name, parts) {
 
 function finishTurn() {
   const name = names[index];
-  const parts = interim ? [...transcript, interim] : transcript;
+  const parts = [...transcript, ...sessionParts].filter(Boolean);
   transcript = [];
-  interim = '';
+  sessionParts = [];
   finishing = false;
   retryUsed = false;
   index = nextSpeaker;
@@ -139,6 +146,8 @@ function paused(message) {
 }
 
 function startRecognition(automatic = false) {
+  transcript.push(...sessionParts.filter(Boolean));
+  sessionParts = [];
   const session = new SpeechRecognition();
   recognition = session;
   session.lang = 'zh-CN';
@@ -172,15 +181,13 @@ function startRecognition(automatic = false) {
   session.onresult = event => {
     if (recognition !== session) return;
     started();
-    interim = '';
+    // Each recognition session reuses result indices as provisional text becomes final.
+    // Keep the last nonempty result if the browser drops that slot during shutdown.
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i];
-      const text = result[0].transcript.trim();
-      if (result.isFinal && text) {
-        transcript.push(text);
+      const text = event.results[i][0].transcript.trim();
+      if (text) {
+        sessionParts[i] = text;
         retryUsed = false;
-      } else if (text) {
-        interim = (interim + ' ' + text).trim();
       }
     }
     showTranscript();
@@ -195,8 +202,6 @@ function startRecognition(automatic = false) {
     if (finishing) {
       finishTurn();
     } else if ((!error || error === 'no-speech') && !retryUsed) {
-      if (interim) transcript.push(interim);
-      interim = '';
       retryUsed = true;
       startRecognition(true);
     } else {
@@ -322,8 +327,6 @@ advance.onclick = () => {
   }
   if (retryStartup) return retryStartup();
   if (!recognition) {
-    if (interim) transcript.push(interim);
-    interim = '';
     retryUsed = false;
     startRecognition();
     return;
@@ -345,7 +348,7 @@ function stopTurn(position = -1) {
     recognition = null;
     try { session.abort(); } catch {}
     finishTurn();
-  }, 2500);
+  }, 4000);
   try {
     session.stop();
   } catch {
