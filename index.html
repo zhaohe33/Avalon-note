@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="按座位顺序录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
-  <link rel="stylesheet" href="style.css?v=5">
-  <script src="app.js?v=5" defer></script>
+  <link rel="stylesheet" href="style.css?v=6">
+  <script src="app.js?v=6" defer></script>
 </head>
 <body>
   <main>
@@ -14,23 +14,16 @@
     <section class="panel">
       <form id="setup">
         <h1>安排发言顺序</h1>
-        <label for="player-count">玩家人数</label>
-        <select id="player-count">
-          <option value="5">5 人</option>
-          <option value="6">6 人</option>
-          <option value="7">7 人</option>
-          <option value="8">8 人</option>
-          <option value="9">9 人</option>
-          <option value="10">10 人</option>
-        </select>
-        <p id="order-hint">点座位填写名字。发言从 1 号座开始，按顺时针进行。</p>
-        <div class="roundtable">
+        <label for="player-names">玩家名单</label>
+        <p id="order-hint">输入或粘贴 5–10 个名字，每行一个。第一行是 1 号座，之后按顺时针排列。</p>
+        <textarea id="player-names" rows="5" maxlength="1000" aria-describedby="order-hint player-count" placeholder="小林&#10;阿杰&#10;小周"></textarea>
+        <p id="player-count" role="status"></p>
+        <div class="roundtable" id="roundtable" hidden>
           <div class="table-center" aria-hidden="true">圆桌<br><small>顺时针发言</small></div>
           <div id="roster" role="group" aria-label="圆桌座位" aria-describedby="order-hint"></div>
         </div>
-        <div class="seat-editor">
-          <label id="seat-label" for="seat-name">1 号座玩家</label>
-          <input id="seat-name" type="text" maxlength="60" placeholder="玩家名字">
+        <div class="seat-editor" id="seat-editor" hidden>
+          <p id="seat-label"></p>
           <div class="seat-actions">
             <button type="button" id="move-back">逆时针移一位</button>
             <button type="button" id="move-forward">顺时针移一位</button>

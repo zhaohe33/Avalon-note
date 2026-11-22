@@ -19,9 +19,9 @@ h2 { font-size: 1.2rem; }
 p { color: var(--muted); line-height: 1.55; }
 label { display: block; margin-top: 20px; font-weight: 650; }
 #order-hint { margin: 4px 0 10px; }
-input, select, button { font: inherit; border-radius: 9px; }
-input, select { min-height: 44px; padding: 8px 10px; background: #0e1622; border: 1px solid #425168; color: inherit; }
-select { margin-top: 7px; }
+textarea, button { font: inherit; border-radius: 9px; }
+textarea { display: block; width: 100%; resize: vertical; min-height: 105px; padding: 8px 10px; background: #0e1622; border: 1px solid #425168; color: inherit; }
+#player-count { margin-top: 6px; font-size: .9rem; }
 button { width: 100%; min-height: 52px; margin-top: 15px; padding: 10px; background: var(--gold); color: #271e14; border: 0; font-weight: 750; cursor: pointer; }
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
@@ -45,7 +45,6 @@ li ul { padding-left: 20px; line-height: 1.55; }
 .seat-number, .seat-name { display: block; }
 .seat-number { color: var(--gold); font-size: .84rem; }
 .seat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; }
-.seat-editor label { margin: 0 0 6px; }
-.seat-editor input { width: 100%; }
+.seat-editor p { overflow-wrap: anywhere; }
 .seat-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
 .seat-actions button { min-height: 44px; margin: 0; padding: 6px; background: #263348; color: #edf0f4; font-size: .9rem; }
