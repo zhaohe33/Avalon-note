@@ -216,8 +216,8 @@ function renderRoster() {
     const name = document.createElement('span');
     button.type = 'button';
     button.className = 'seat';
-    button.style.left = (50 + 37 * Math.sin(angle)) + '%';
-    button.style.top = (50 - 39 * Math.cos(angle)) + '%';
+    button.style.left = (50 - 37 * Math.sin(angle)) + '%';
+    button.style.top = (50 + 39 * Math.cos(angle)) + '%';
     number.textContent = position + 1;
     number.className = 'seat-number';
     name.className = 'seat-name';

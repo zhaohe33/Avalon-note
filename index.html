@@ -6,7 +6,7 @@
   <meta name="description" content="按座位顺序录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
   <link rel="stylesheet" href="style.css?v=6">
-  <script src="app.js?v=6" defer></script>
+  <script src="app.js?v=7" defer></script>
 </head>
 <body>
   <main>
@@ -15,7 +15,7 @@
       <form id="setup">
         <h1>安排发言顺序</h1>
         <label for="player-names">玩家名单</label>
-        <p id="order-hint">输入或粘贴 5–10 个名字，每行一个。第一行是 1 号座，之后按顺时针排列。</p>
+        <p id="order-hint">输入或粘贴 5–10 个名字，每行一个。第一行是正下方的 1 号座，之后按顺时针排列。</p>
         <textarea id="player-names" rows="5" maxlength="1000" aria-describedby="order-hint player-count" placeholder="小林&#10;阿杰&#10;小周"></textarea>
         <p id="player-count" role="status"></p>
         <div class="roundtable" id="roundtable" hidden>
