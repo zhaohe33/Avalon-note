@@ -22,10 +22,6 @@ label { display: block; margin-top: 20px; font-weight: 650; }
 input, select, button { font: inherit; border-radius: 9px; }
 input, select { min-height: 44px; padding: 8px 10px; background: #0e1622; border: 1px solid #425168; color: inherit; }
 select { margin-top: 7px; }
-#roster > li { display: list-item; padding: 0; margin: 6px 0; border: 0; }
-#roster input { width: calc(100% - 112px); min-width: 0; }
-#roster button { width: 50px; min-height: 44px; margin: 0 0 0 6px; padding: 4px; background: #263348; color: #edf0f4; }
-
 button { width: 100%; min-height: 52px; margin-top: 15px; padding: 10px; background: var(--gold); color: #271e14; border: 0; font-weight: 750; cursor: pointer; }
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
@@ -39,3 +35,17 @@ ol > li + li { margin-top: 12px; padding-top: 12px; border-top: 1px solid #303c5
 li { overflow-wrap: anywhere; }
 li p, li ul { margin: 5px 0 0; }
 li ul { padding-left: 20px; line-height: 1.55; }
+
+.roundtable { position: relative; aspect-ratio: 1; width: min(100%, 420px); margin: 0 auto; }
+.table-center { position: absolute; inset: 22%; display: grid; align-content: center; text-align: center; border-radius: 50%; border: 1px solid #715a3d; box-shadow: inset 0 0 0 5px #22242b; background: radial-gradient(#393022, #25242a); color: var(--gold); font-weight: 750; line-height: 1.45; }
+.table-center small { color: var(--muted); font-weight: 500; }
+#roster { position: absolute; inset: 0; }
+#roster .seat { position: absolute; transform: translate(-50%, -50%); width: clamp(47px, 21%, 78px); min-height: 44px; margin: 0; padding: 3px 4px; border: 1px solid #425168; background: #1e2a3a; color: #edf0f4; line-height: 1.15; }
+#roster .seat[aria-pressed="true"] { border-color: var(--gold); background: #383024; }
+.seat-number, .seat-name { display: block; }
+.seat-number { color: var(--gold); font-size: .84rem; }
+.seat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; }
+.seat-editor label { margin: 0 0 6px; }
+.seat-editor input { width: 100%; }
+.seat-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.seat-actions button { min-height: 44px; margin: 0; padding: 6px; background: #263348; color: #edf0f4; font-size: .9rem; }

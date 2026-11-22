@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="按座位顺序录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
-  <link rel="stylesheet" href="style.css?v=4">
-  <script src="app.js?v=4" defer></script>
+  <link rel="stylesheet" href="style.css?v=5">
+  <script src="app.js?v=5" defer></script>
 </head>
 <body>
   <main>
@@ -23,8 +23,19 @@
           <option value="9">9 人</option>
           <option value="10">10 人</option>
         </select>
-        <p id="order-hint">填写玩家名字，用「上移」或「下移」调整发言顺序。</p>
-        <ol id="roster" aria-label="发言顺序" aria-describedby="order-hint"></ol>
+        <p id="order-hint">点座位填写名字。发言从 1 号座开始，按顺时针进行。</p>
+        <div class="roundtable">
+          <div class="table-center" aria-hidden="true">圆桌<br><small>顺时针发言</small></div>
+          <div id="roster" role="group" aria-label="圆桌座位" aria-describedby="order-hint"></div>
+        </div>
+        <div class="seat-editor">
+          <label id="seat-label" for="seat-name">1 号座玩家</label>
+          <input id="seat-name" type="text" maxlength="60" placeholder="玩家名字">
+          <div class="seat-actions">
+            <button type="button" id="move-back">逆时针移一位</button>
+            <button type="button" id="move-forward">顺时针移一位</button>
+          </div>
+        </div>
         <button id="start">开始录制第一位</button>
       </form>
       <div id="session" hidden>

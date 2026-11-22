@@ -2,6 +2,8 @@ const get = id => document.getElementById(id);
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const count = get('player-count');
 const roster = get('roster');
+const seatName = get('seat-name');
+let selectedSeat = 0;
 const playerNames = Array(10).fill('');
 const advance = get('advance');
 let names = [];
@@ -181,52 +183,79 @@ function startRecognition(automatic = false) {
   }
 }
 
-function renderRoster(focusPosition) {
+function seatLabel(position) {
+  return (position + 1) + ' 号座';
+}
+
+function updateSeat(button, position) {
+  const name = playerNames[position].trim();
+  button.lastElementChild.textContent = name || '待填写';
+  button.setAttribute('aria-label', seatLabel(position) + '，' + (name || '待填写'));
+  button.setAttribute('aria-pressed', position === selectedSeat);
+}
+
+function selectSeat(position) {
+  selectedSeat = position;
+  get('seat-label').textContent = seatLabel(position) + '玩家';
+  seatName.value = playerNames[position];
+  Array.from(roster.children).forEach(updateSeat);
+}
+
+function renderRoster() {
   const total = Number(count.value);
-  const rows = playerNames.slice(0, total).map((name, position) => {
-    const row = document.createElement('li');
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = name;
-    input.placeholder = '玩家名字';
-    input.maxLength = 60;
-    input.required = true;
-    input.setAttribute('aria-label', '第 ' + (position + 1) + ' 位玩家名字');
-    input.oninput = () => {
-      playerNames[position] = input.value;
+  const seats = Array.from({length: total}, (_, position) => {
+    const angle = 2 * Math.PI * position / total;
+    const button = document.createElement('button');
+    const number = document.createElement('span');
+    const name = document.createElement('span');
+    button.type = 'button';
+    button.className = 'seat';
+    button.style.left = (50 + 37 * Math.sin(angle)) + '%';
+    button.style.top = (50 - 39 * Math.cos(angle)) + '%';
+    number.textContent = position + 1;
+    number.className = 'seat-number';
+    name.className = 'seat-name';
+    button.append(number, name);
+    button.onclick = () => {
+      selectSeat(position);
       notice();
     };
-    row.append(input);
-    for (const [delta, label] of [[-1, '上移'], [1, '下移']]) {
-      const target = position + delta;
-      const move = document.createElement('button');
-      move.type = 'button';
-      move.textContent = label;
-      move.setAttribute('aria-label', '第 ' + (position + 1) + ' 位玩家' + label);
-      move.disabled = target < 0 || target >= total;
-      move.onclick = () => {
-        [playerNames[position], playerNames[target]] = [playerNames[target], playerNames[position]];
-        renderRoster(target);
-        notice();
-      };
-      row.append(move);
-    }
-    return row;
+    return button;
   });
-  roster.replaceChildren(...rows);
-  if (focusPosition !== undefined) rows[focusPosition].firstElementChild.focus();
+  roster.replaceChildren(...seats);
+  selectSeat(Math.min(selectedSeat, total - 1));
+}
+
+function moveSeat(direction) {
+  const total = Number(count.value);
+  const destination = (selectedSeat + direction + total) % total;
+  [playerNames[selectedSeat], playerNames[destination]] = [playerNames[destination], playerNames[selectedSeat]];
+  selectSeat(destination);
+  notice();
 }
 
 count.onchange = () => {
   renderRoster();
   notice();
 };
+seatName.oninput = () => {
+  playerNames[selectedSeat] = seatName.value;
+  updateSeat(roster.children[selectedSeat], selectedSeat);
+  notice();
+};
+get('move-back').onclick = () => moveSeat(-1);
+get('move-forward').onclick = () => moveSeat(1);
 renderRoster();
 
 get('setup').onsubmit = event => {
   event.preventDefault();
   const ordered = playerNames.slice(0, Number(count.value)).map(name => name.trim());
-  if (ordered.some(name => !name)) return notice('请填完所有玩家的名字。');
+  const missing = ordered.findIndex(name => !name);
+  if (missing !== -1) {
+    selectSeat(missing);
+    seatName.focus();
+    return notice('请填写' + seatLabel(missing) + '的玩家名字。');
+  }
   if (new Set(ordered).size !== ordered.length) return notice('请给同名玩家加上区分用的昵称。');
   if (!SpeechRecognition) return notice('当前浏览器不支持语音识别。请用 Safari 或 Chrome 打开站点后重试。');
   notice();
