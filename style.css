@@ -19,9 +19,14 @@ h2 { font-size: 1.2rem; }
 p { color: var(--muted); line-height: 1.55; }
 label { display: block; margin-top: 20px; font-weight: 650; }
 #order-hint { margin: 4px 0 10px; }
-textarea, button { width: 100%; font: inherit; border-radius: 9px; }
-textarea { min-height: 130px; padding: 11px; resize: vertical; background: #0e1622; border: 1px solid #425168; color: inherit; line-height: 1.55; }
-button { min-height: 52px; margin-top: 15px; padding: 10px; background: var(--gold); color: #271e14; border: 0; font-weight: 750; cursor: pointer; }
+input, select, button { font: inherit; border-radius: 9px; }
+input, select { min-height: 44px; padding: 8px 10px; background: #0e1622; border: 1px solid #425168; color: inherit; }
+select { margin-top: 7px; }
+#roster > li { display: list-item; padding: 0; margin: 6px 0; border: 0; }
+#roster input { width: calc(100% - 112px); min-width: 0; }
+#roster button { width: 50px; min-height: 44px; margin: 0 0 0 6px; padding: 4px; background: #263348; color: #edf0f4; }
+
+button { width: 100%; min-height: 52px; margin-top: 15px; padding: 10px; background: var(--gold); color: #271e14; border: 0; font-weight: 750; cursor: pointer; }
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .progress { color: var(--gold); margin-bottom: 5px; }

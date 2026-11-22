@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="按座位顺序录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="app.js?v=3" defer></script>
+  <link rel="stylesheet" href="style.css?v=4">
+  <script src="app.js?v=4" defer></script>
 </head>
 <body>
   <main>
@@ -14,9 +14,17 @@
     <section class="panel">
       <form id="setup">
         <h1>安排发言顺序</h1>
-        <label for="names">玩家名字</label>
-        <p id="order-hint">每行填一个名字，从上到下就是发言顺序。</p>
-        <textarea id="names" rows="5" maxlength="600" required aria-describedby="order-hint" placeholder="小林&#10;阿杰&#10;小周"></textarea>
+        <label for="player-count">玩家人数</label>
+        <select id="player-count">
+          <option value="5">5 人</option>
+          <option value="6">6 人</option>
+          <option value="7">7 人</option>
+          <option value="8">8 人</option>
+          <option value="9">9 人</option>
+          <option value="10">10 人</option>
+        </select>
+        <p id="order-hint">填写玩家名字，用「上移」或「下移」调整发言顺序。</p>
+        <ol id="roster" aria-label="发言顺序" aria-describedby="order-hint"></ol>
         <button id="start">开始录制第一位</button>
       </form>
       <div id="session" hidden>

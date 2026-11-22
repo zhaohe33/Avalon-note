@@ -1,6 +1,8 @@
 const get = id => document.getElementById(id);
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const namesField = get('names');
+const count = get('player-count');
+const roster = get('roster');
+const playerNames = Array(10).fill('');
 const advance = get('advance');
 let names = [];
 let index = 0;
@@ -179,10 +181,52 @@ function startRecognition(automatic = false) {
   }
 }
 
+function renderRoster(focusPosition) {
+  const total = Number(count.value);
+  const rows = playerNames.slice(0, total).map((name, position) => {
+    const row = document.createElement('li');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = name;
+    input.placeholder = '玩家名字';
+    input.maxLength = 60;
+    input.required = true;
+    input.setAttribute('aria-label', '第 ' + (position + 1) + ' 位玩家名字');
+    input.oninput = () => {
+      playerNames[position] = input.value;
+      notice();
+    };
+    row.append(input);
+    for (const [delta, label] of [[-1, '上移'], [1, '下移']]) {
+      const target = position + delta;
+      const move = document.createElement('button');
+      move.type = 'button';
+      move.textContent = label;
+      move.setAttribute('aria-label', '第 ' + (position + 1) + ' 位玩家' + label);
+      move.disabled = target < 0 || target >= total;
+      move.onclick = () => {
+        [playerNames[position], playerNames[target]] = [playerNames[target], playerNames[position]];
+        renderRoster(target);
+        notice();
+      };
+      row.append(move);
+    }
+    return row;
+  });
+  roster.replaceChildren(...rows);
+  if (focusPosition !== undefined) rows[focusPosition].firstElementChild.focus();
+}
+
+count.onchange = () => {
+  renderRoster();
+  notice();
+};
+renderRoster();
+
 get('setup').onsubmit = event => {
   event.preventDefault();
-  const ordered = namesField.value.split(/\r?\n/u).map(name => name.trim()).filter(Boolean);
-  if (!ordered.length) return notice('请填写至少一位玩家的名字。');
+  const ordered = playerNames.slice(0, Number(count.value)).map(name => name.trim());
+  if (ordered.some(name => !name)) return notice('请填完所有玩家的名字。');
   if (new Set(ordered).size !== ordered.length) return notice('请给同名玩家加上区分用的昵称。');
   if (!SpeechRecognition) return notice('当前浏览器不支持语音识别。请用 Safari 或 Chrome 打开站点后重试。');
   notice();
