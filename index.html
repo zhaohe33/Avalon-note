@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="按玩家和轮次记录阿瓦隆发言，生成每位玩家的 AI 摘要。">
+<title>圆桌档案 · 阿瓦隆发言助手</title>
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="bar"><a class="brand" href="./"><span class="seal" aria-hidden="true">⚔</span><span>圆桌档案<small>AVALON CHRONICLE</small></span></a><a class="button subtle" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">打开 ChatGPT</a></div></header>
+<main>
+<section class="hero"><div class="hero-art"></div><div class="hero-content"><div class="eyebrow"><span></span> AVALON SESSION NOTES</div><h1>阿瓦隆发言助手</h1><p>记录圆桌上的每一句话，理清每位玩家的立场。</p><div class="hero-actions"><button class="button" id="new-game">＋ 新开一局</button><button class="button subtle" id="demo">载入示例</button></div></div></section>
+<div class="section-head"><div><h2>对局工作台</h2><p id="counts"></p></div><div class="head-actions"><button id="add-player" class="button subtle">＋ 添加玩家</button><button id="add-round" class="button subtle">＋ 新增轮次</button></div></div>
+<div class="workspace">
+<section class="panel players"><div class="panel-head"><h3>玩家席位</h3><span id="player-count" class="pill"></span></div><div id="players"></div></section>
+<section class="panel transcript"><div class="panel-head"><h3>发言记录</h3><select id="round" aria-label="轮次"></select></div><form id="entry"><label for="speaker">当前发言人</label><div class="speaker-controls"><select id="speaker" required></select><button type="button" id="next-player" class="button subtle">下一位</button></div><label for="speech">发言内容</label><textarea id="speech" rows="4" maxlength="12000" required placeholder="输入或粘贴玩家发言…"></textarea><div class="form-footer"><button type="button" id="voice" class="button subtle" hidden>语音输入</button><button class="button primary" id="record">保存发言</button></div></form><div class="history-head"><h4>本轮时间线</h4><span id="round-count"></span></div><div id="timeline"></div></section>
+<section class="panel analysis"><div class="panel-head"><h3><span class="spark">✦</span> AI 发言摘要</h3><span class="pill" id="ai-badge">ChatGPT</span></div><div class="analysis-body"><button class="button primary wide" id="analyze">✦ 复制发言与总结提示词</button><p id="scope">复制后粘贴到你已登录的 ChatGPT，发送即可生成逐人摘要。</p><div id="summaries"></div></div></section>
+</div>
+<footer>发言记录保存在当前浏览器。粘贴并发送到 ChatGPT 后，ChatGPT 才会收到发言。</footer>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="dialog"><div class="panel-head"><h3 id="dialog-title"></h3><button class="button subtle" id="close-dialog" aria-label="关闭">×</button></div><div id="dialog-body"></div></dialog>
+</body>
+</html>
