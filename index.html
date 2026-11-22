@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="点选圆桌头像录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
-  <link rel="stylesheet" href="style.css?v=10">
-  <script src="app.js?v=11" defer></script>
+  <link rel="stylesheet" href="style.css?v=12">
+  <script src="app.js?v=12" defer></script>
 </head>
 <body>
   <main>
@@ -35,7 +35,6 @@
         <h1 id="speaker"></h1>
         <p id="status" role="status"></p>
         <div id="speaker-table"></div>
-        <p id="live" class="live" hidden></p>
         <div id="direction-controls" hidden>
           <div class="seat-actions" role="group" aria-label="发言方向">
             <button type="button" id="clockwise" aria-pressed="false">顺时针</button>
@@ -45,11 +44,26 @@
         </div>
         <button id="advance" type="button" disabled>开始发言</button>
       </div>
+      <section id="board" class="board" aria-labelledby="board-title" hidden>
+        <h2 id="board-title">本局板子</h2>
+        <p id="good-roles"></p>
+        <p id="evil-roles"></p>
+        <p id="quest-sizes"></p>
+        <div id="board-options" class="board-options">
+          <label><input type="checkbox" id="mordred"> 加入莫德雷德</label>
+          <label><input type="checkbox" id="oberon"> 加入奥伯伦</label>
+        </div>
+      </section>
       <p id="notice" role="alert" hidden></p>
     </section>
     <section class="panel results" id="results" hidden>
       <h2>发言摘要</h2>
       <ol id="summaries"></ol>
+      <div class="seat-actions">
+        <button type="button" id="copy-analysis" disabled>复制 AI 分析材料</button>
+        <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">打开 ChatGPT</a>
+      </div>
+      <p id="analysis-status" role="status"></p>
     </section>
   </main>
 </body>

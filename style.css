@@ -26,7 +26,6 @@ button { width: 100%; min-height: 52px; margin-top: 15px; padding: 10px; backgro
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 #status { margin-top: 8px; }
-.live { max-height: 9em; overflow: auto; margin-top: 12px; padding: 10px; background: #0e1622; border-radius: 8px; overflow-wrap: anywhere; }
 #notice { color: #ffd3ae; margin-top: 12px; }
 .results { margin-top: 14px; }
 ol { margin: 12px 0 0; padding-left: 24px; }
@@ -55,6 +54,11 @@ li ul { padding-left: 20px; line-height: 1.55; }
 #direction-controls:not([hidden]) + #advance { min-height: 44px; margin-top: 8px; background: #263348; color: #edf0f4; }
 #next { overflow-wrap: anywhere; }
 
-.live, .full-transcript { white-space: pre-wrap; }
-.results details { margin-top: 8px; }
-.results summary { color: var(--gold); cursor: pointer; }
+
+
+.board { margin-top: 18px; padding-top: 14px; border-top: 1px solid #303c50; }
+.board p { margin-top: 5px; }
+.board-options { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.board-options label { margin-top: 6px; }
+.results .seat-actions a { display: grid; place-items: center; min-height: 44px; padding: 6px; border-radius: 9px; color: var(--gold); background: #263348; font-weight: 750; text-decoration: none; }
+#analysis-status { margin-top: 6px; }
