@@ -25,7 +25,6 @@ textarea { display: block; width: 100%; resize: vertical; min-height: 105px; pad
 button { width: 100%; min-height: 52px; margin-top: 15px; padding: 10px; background: var(--gold); color: #271e14; border: 0; font-weight: 750; cursor: pointer; }
 button:disabled { opacity: .55; cursor: default; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-.progress { color: var(--gold); margin-bottom: 5px; }
 #status { margin-top: 8px; }
 .live { max-height: 9em; overflow: auto; margin-top: 12px; padding: 10px; background: #0e1622; border-radius: 8px; overflow-wrap: anywhere; }
 #notice { color: #ffd3ae; margin-top: 12px; }
@@ -48,3 +47,6 @@ li ul { padding-left: 20px; line-height: 1.55; }
 .seat-editor p { overflow-wrap: anywhere; }
 .seat-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
 .seat-actions button { min-height: 44px; margin: 0; padding: 6px; background: #263348; color: #edf0f4; font-size: .9rem; }
+
+#session .seat-number { display: grid; place-items: center; margin: 0 auto 2px; width: 22px; height: 22px; border-radius: 50%; background: #34445b; }
+#session .seat[aria-pressed="true"] .seat-number { background: var(--gold); color: #271e14; }

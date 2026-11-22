@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="按座位顺序录入阿瓦隆发言，每次切换自动生成发言要点。">
+  <meta name="description" content="点选圆桌头像录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
-  <link rel="stylesheet" href="style.css?v=6">
-  <script src="app.js?v=7" defer></script>
+  <link rel="stylesheet" href="style.css?v=8">
+  <script src="app.js?v=8" defer></script>
 </head>
 <body>
   <main>
     <header><span aria-hidden="true">⚔</span> 圆桌档案</header>
     <section class="panel">
       <form id="setup">
-        <h1>安排发言顺序</h1>
+        <h1>安排圆桌座位</h1>
         <label for="player-names">玩家名单</label>
         <p id="order-hint">输入或粘贴 5–10 个名字，每行一个。第一行是正下方的 1 号座，之后按顺时针排列。</p>
         <textarea id="player-names" rows="5" maxlength="1000" aria-describedby="order-hint player-count" placeholder="小林&#10;阿杰&#10;小周"></textarea>
         <p id="player-count" role="status"></p>
         <div class="roundtable" id="roundtable" hidden>
-          <div class="table-center" aria-hidden="true">圆桌<br><small>顺时针发言</small></div>
+          <div class="table-center" aria-hidden="true">圆桌<br><small id="table-hint">顺时针排座</small></div>
           <div id="roster" role="group" aria-label="圆桌座位" aria-describedby="order-hint"></div>
         </div>
         <div class="seat-editor" id="seat-editor" hidden>
@@ -29,14 +29,14 @@
             <button type="button" id="move-forward">顺时针移一位</button>
           </div>
         </div>
-        <button id="start">开始录制第一位</button>
+        <button id="start">进入圆桌</button>
       </form>
       <div id="session" hidden>
-        <p class="progress" id="progress"></p>
         <h1 id="speaker"></h1>
         <p id="status" role="status"></p>
+        <div id="speaker-table"></div>
         <p id="live" class="live" hidden></p>
-        <button id="advance">结束并录制下一位</button>
+        <button id="advance" type="button" hidden>结束这段发言</button>
       </div>
       <p id="notice" role="alert" hidden></p>
     </section>

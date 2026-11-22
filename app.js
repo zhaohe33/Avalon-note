@@ -6,7 +6,8 @@ let selectedSeat = 0;
 let playerNames = [];
 const advance = get('advance');
 let names = [];
-let index = 0;
+let index = -1;
+let nextSpeaker = -1;
 let transcript = [];
 let interim = '';
 let recognition;
@@ -27,14 +28,26 @@ function showTranscript() {
   live.scrollTop = live.scrollHeight;
 }
 
-function actionLabel() {
-  return index === names.length - 1 ? '结束本轮发言' : '结束并录制下一位';
+function showSpeaker() {
+  const active = index !== -1;
+  get('speaker').textContent = active ? names[index] : '请选择发言人';
+  get('status').textContent = active ? '' : '点圆桌上的头像开始录音。';
+  advance.hidden = !active;
+  advance.textContent = '结束这段发言';
+  Array.from(roster.children).forEach(updateSeat);
 }
 
-function showSpeaker() {
-  get('progress').textContent = '第 ' + (index + 1) + ' 位 / 共 ' + names.length + ' 位';
-  get('speaker').textContent = names[index];
-  advance.textContent = actionLabel();
+function chooseSpeaker(position) {
+  if (finishing) return;
+  if (index === -1) {
+    index = position;
+    showSpeaker();
+    startRecognition();
+  } else if (index !== position) {
+    stopTurn(position);
+  } else if (retryStartup || !recognition) {
+    advance.click();
+  }
 }
 
 function extractHighlights(parts) {
@@ -78,18 +91,11 @@ function finishTurn() {
   interim = '';
   finishing = false;
   retryUsed = false;
-  index++;
+  index = nextSpeaker;
+  nextSpeaker = -1;
   showTranscript();
-  if (index < names.length) {
-    showSpeaker();
-    startRecognition(true);
-  } else {
-    get('progress').textContent = names.length + ' 位玩家';
-    get('speaker').textContent = '本轮结束';
-    get('status').textContent = '本轮发言摘要已生成。';
-    advance.textContent = '开始下一轮';
-    advance.disabled = false;
-  }
+  showSpeaker();
+  if (index !== -1) startRecognition(true);
   addSummary(name, parts);
 }
 
@@ -126,7 +132,7 @@ function startRecognition(automatic = false) {
     clearTimeout(startTimer);
     retryStartup = null;
     get('status').textContent = '正在录音，请发言。';
-    advance.textContent = actionLabel();
+    advance.textContent = '结束这段发言';
     advance.disabled = false;
   };
   session.onaudiostart = started;
@@ -166,7 +172,7 @@ function startRecognition(automatic = false) {
     }
   };
   startTimer = setTimeout(() => {
-    if (recognition !== session) return;
+    if (recognition !== session || finishing) return;
     recognition = null;
     retryStartup = null;
     try { session.abort(); } catch {}
@@ -190,7 +196,7 @@ function updateSeat(button, position) {
   const name = playerNames[position].trim();
   button.lastElementChild.textContent = name || '待填写';
   button.setAttribute('aria-label', seatLabel(position) + '，' + (name || '待填写'));
-  button.setAttribute('aria-pressed', position === selectedSeat);
+  button.setAttribute('aria-pressed', position === (names.length ? index : selectedSeat));
 }
 
 function selectSeat(position) {
@@ -223,6 +229,7 @@ function renderRoster() {
     name.className = 'seat-name';
     button.append(number, name);
     button.onclick = () => {
+      if (names.length) return chooseSpeaker(position);
       selectSeat(position);
       notice();
     };
@@ -261,24 +268,19 @@ get('setup').onsubmit = event => {
   if (new Set(ordered).size !== ordered.length) return notice('请给同名玩家加上区分用的昵称。');
   if (!SpeechRecognition) return notice('当前浏览器不支持语音识别。请用 Safari 或 Chrome 打开站点后重试。');
   notice();
+  playerNames = ordered;
+  renderRoster();
   names = ordered;
-  index = 0;
+  get('speaker-table').append(get('roundtable'));
+  get('table-hint').textContent = '点头像发言';
+  roster.removeAttribute('aria-describedby');
   get('setup').hidden = true;
   get('session').hidden = false;
   showSpeaker();
-  startRecognition();
 };
 
 advance.onclick = () => {
   if (retryStartup) return retryStartup();
-  if (index >= names.length) {
-    get('summaries').replaceChildren();
-    get('results').hidden = true;
-    index = 0;
-    showSpeaker();
-    startRecognition();
-    return;
-  }
   if (!recognition) {
     if (interim) transcript.push(interim);
     interim = '';
@@ -286,6 +288,13 @@ advance.onclick = () => {
     startRecognition();
     return;
   }
+  stopTurn();
+};
+
+function stopTurn(position = -1) {
+  if (finishing) return;
+  nextSpeaker = position;
+  if (!recognition) return finishTurn();
   finishing = true;
   advance.disabled = true;
   get('status').textContent = '正在收尾上一位的语音…';
@@ -303,4 +312,4 @@ advance.onclick = () => {
     recognition = null;
     finishTurn();
   }
-};
+}
