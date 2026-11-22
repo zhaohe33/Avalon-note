@@ -62,3 +62,6 @@ li ul { padding-left: 20px; line-height: 1.55; }
 .board-options label { margin-top: 6px; }
 .results .seat-actions a { display: grid; place-items: center; min-height: 44px; padding: 6px; border-radius: 9px; color: var(--gold); background: #263348; font-weight: 750; text-decoration: none; }
 #analysis-status { margin-top: 6px; }
+
+#analysis-board { margin-top: 7px; }
+#analysis-findings { padding-left: 20px; line-height: 1.55; }

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="点选圆桌头像录入阿瓦隆发言，每次切换自动生成发言要点。">
   <title>圆桌档案 · 发言记录</title>
-  <link rel="stylesheet" href="style.css?v=12">
-  <script src="app.js?v=12" defer></script>
+  <link rel="stylesheet" href="style.css?v=13">
+  <script src="app.js?v=13" defer></script>
 </head>
 <body>
   <main>
@@ -57,8 +57,14 @@
       <p id="notice" role="alert" hidden></p>
     </section>
     <section class="panel results" id="results" hidden>
-      <h2>发言摘要</h2>
+      <h2>发言概述</h2>
       <ol id="summaries"></ol>
+      <button type="button" id="start-analysis">发言结束，开始分析</button>
+    </section>
+    <section class="panel results" id="analysis" aria-labelledby="analysis-title" hidden>
+      <h2 id="analysis-title" tabindex="-1">全局分析</h2>
+      <p id="analysis-board"></p>
+      <ul id="analysis-findings"></ul>
       <div class="seat-actions">
         <button type="button" id="copy-analysis" disabled>复制 AI 分析材料</button>
         <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">打开 ChatGPT</a>
