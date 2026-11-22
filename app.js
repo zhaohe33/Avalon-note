@@ -7,6 +7,8 @@ let playerNames = [];
 const advance = get('advance');
 let names = [];
 let index = -1;
+let startingSeat = -1;
+let direction = 0;
 let nextSpeaker = -1;
 let transcript = [];
 let interim = '';
@@ -28,27 +30,54 @@ function showTranscript() {
   live.scrollTop = live.scrollHeight;
 }
 
+function updateDirection() {
+  const active = index !== -1;
+  get('direction-controls').hidden = !active;
+  get('clockwise').setAttribute('aria-pressed', direction === 1);
+  get('counterclockwise').setAttribute('aria-pressed', direction === -1);
+  const next = get('next');
+  next.disabled = !direction || finishing;
+  next.textContent = direction && active ? '下一位 · ' + names[nextSeat()] : '下一位';
+}
+
+function nextSeat() {
+  return (index + direction + names.length) % names.length;
+}
+
 function showSpeaker() {
   const active = index !== -1;
-  get('speaker').textContent = active ? names[index] : '请选择发言人';
-  get('status').textContent = active ? '' : '点圆桌上的头像开始录音。';
-  advance.hidden = !active;
-  advance.textContent = '结束这段发言';
+  const selected = active ? index : startingSeat;
+  get('speaker').textContent = selected === -1 ? '请选择发言人' : names[selected];
+  get('status').textContent = active ? '' : '点头像选首位，然后按「开始发言」。';
+  advance.disabled = selected === -1;
+  advance.textContent = active ? '结束这段发言' : '开始发言';
   Array.from(roster.children).forEach(updateSeat);
+  updateDirection();
 }
 
 function chooseSpeaker(position) {
   if (finishing) return;
   if (index === -1) {
-    index = position;
+    startingSeat = position;
     showSpeaker();
-    startRecognition();
   } else if (index !== position) {
     stopTurn(position);
   } else if (retryStartup || !recognition) {
     advance.click();
   }
 }
+
+get('clockwise').onclick = () => {
+  direction = 1;
+  updateDirection();
+};
+get('counterclockwise').onclick = () => {
+  direction = -1;
+  updateDirection();
+};
+get('next').onclick = () => {
+  if (index !== -1 && direction) stopTurn(nextSeat());
+};
 
 function extractHighlights(parts) {
   const sentences = parts.flatMap(part => part.split(/[。！？；!?;\n]+/u))
@@ -92,6 +121,10 @@ function finishTurn() {
   finishing = false;
   retryUsed = false;
   index = nextSpeaker;
+  if (index === -1) {
+    startingSeat = -1;
+    direction = 0;
+  }
   nextSpeaker = -1;
   showTranscript();
   showSpeaker();
@@ -196,7 +229,7 @@ function updateSeat(button, position) {
   const name = playerNames[position].trim();
   button.lastElementChild.textContent = name || '待填写';
   button.setAttribute('aria-label', seatLabel(position) + '，' + (name || '待填写'));
-  button.setAttribute('aria-pressed', position === (names.length ? index : selectedSeat));
+  button.setAttribute('aria-pressed', position === (names.length ? (index === -1 ? startingSeat : index) : selectedSeat));
 }
 
 function selectSeat(position) {
@@ -272,7 +305,7 @@ get('setup').onsubmit = event => {
   renderRoster();
   names = ordered;
   get('speaker-table').append(get('roundtable'));
-  get('table-hint').textContent = '点头像发言';
+  get('table-hint').textContent = '点头像选人';
   roster.removeAttribute('aria-describedby');
   get('setup').hidden = true;
   get('session').hidden = false;
@@ -280,6 +313,13 @@ get('setup').onsubmit = event => {
 };
 
 advance.onclick = () => {
+  if (index === -1) {
+    if (startingSeat === -1) return;
+    index = startingSeat;
+    showSpeaker();
+    startRecognition();
+    return;
+  }
   if (retryStartup) return retryStartup();
   if (!recognition) {
     if (interim) transcript.push(interim);
@@ -297,6 +337,7 @@ function stopTurn(position = -1) {
   if (!recognition) return finishTurn();
   finishing = true;
   advance.disabled = true;
+  updateDirection();
   get('status').textContent = '正在收尾上一位的语音…';
   const session = recognition;
   stopTimer = setTimeout(() => {

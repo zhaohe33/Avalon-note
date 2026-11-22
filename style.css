@@ -50,3 +50,7 @@ li ul { padding-left: 20px; line-height: 1.55; }
 
 #session .seat-number { display: grid; place-items: center; margin: 0 auto 2px; width: 22px; height: 22px; border-radius: 50%; background: #34445b; }
 #session .seat[aria-pressed="true"] .seat-number { background: var(--gold); color: #271e14; }
+
+#direction-controls [aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--gold); color: var(--gold); }
+#direction-controls:not([hidden]) + #advance { min-height: 44px; margin-top: 8px; background: #263348; color: #edf0f4; }
+#next { overflow-wrap: anywhere; }
