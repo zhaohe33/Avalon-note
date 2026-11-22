@@ -102,16 +102,21 @@ function startRecognition() {
   session.continuous = true;
   session.interimResults = true;
   let error;
+  let startTimer;
   get('status').textContent = '正在启动麦克风…';
   advance.disabled = true;
-  session.onstart = () => {
+  const started = () => {
     if (recognition !== session || finishing) return;
+    clearTimeout(startTimer);
     get('status').textContent = '正在录音，请发言。';
     advance.textContent = actionLabel();
     advance.disabled = false;
   };
+  session.onstart = started;
+  session.onaudiostart = started;
   session.onresult = event => {
     if (recognition !== session) return;
+    started();
     interim = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const result = event.results[i];
@@ -128,6 +133,7 @@ function startRecognition() {
   session.onerror = event => { error = event.error; };
   session.onend = () => {
     if (recognition !== session) return;
+    clearTimeout(startTimer);
     clearTimeout(stopTimer);
     recognition = null;
     if (finishing) {
@@ -139,14 +145,21 @@ function startRecognition() {
       startRecognition();
     } else {
       const blocked = error === 'not-allowed' || error === 'service-not-allowed';
-      paused(blocked ? '麦克风不可用，请允许麦克风和语音识别后重试。' : '录音已暂停，请点下方按钮继续。');
+      paused(blocked ? '麦克风权限被拒绝。请在 Safari 或 Chrome 中打开网页并允许麦克风。' : '录音已暂停，请点下方按钮继续。');
     }
   };
+  startTimer = setTimeout(() => {
+    if (recognition !== session) return;
+    recognition = null;
+    try { session.abort(); } catch {}
+    paused('麦克风启动超时。如果你在 ChatGPT 里打开了网页，请用 Safari 或 Chrome 打开，允许麦克风后重试。');
+  }, 10000);
   try {
     session.start();
   } catch {
+    clearTimeout(startTimer);
     recognition = null;
-    paused('无法启动麦克风，请点下方按钮重试。');
+    paused('无法启动麦克风，请在 Safari 或 Chrome 中打开后重试。');
   }
 }
 
