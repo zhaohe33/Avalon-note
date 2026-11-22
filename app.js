@@ -7,6 +7,7 @@ let index = 0;
 let transcript = [];
 let interim = '';
 let recognition;
+let retryStartup;
 let finishing = false;
 let retryUsed = false;
 let stopTimer;
@@ -78,7 +79,7 @@ function finishTurn() {
   showTranscript();
   if (index < names.length) {
     showSpeaker();
-    startRecognition();
+    startRecognition(true);
   } else {
     get('progress').textContent = names.length + ' 位玩家';
     get('speaker').textContent = '本轮结束';
@@ -95,7 +96,7 @@ function paused(message) {
   advance.disabled = false;
 }
 
-function startRecognition() {
+function startRecognition(automatic = false) {
   const session = new SpeechRecognition();
   recognition = session;
   session.lang = 'zh-CN';
@@ -103,16 +104,28 @@ function startRecognition() {
   session.interimResults = true;
   let error;
   let startTimer;
-  get('status').textContent = '正在启动麦克风…';
-  advance.disabled = true;
+  get('status').textContent = automatic
+    ? '正在切换麦克风。等页面显示「正在录音」后再说话。'
+    : '正在启动麦克风…';
+  advance.disabled = !automatic;
+  if (automatic) {
+    advance.textContent = '点此启动当前玩家录音';
+    retryStartup = () => {
+      clearTimeout(startTimer);
+      retryStartup = null;
+      recognition = null;
+      try { session.abort(); } catch {}
+      startRecognition();
+    };
+  }
   const started = () => {
     if (recognition !== session || finishing) return;
     clearTimeout(startTimer);
+    retryStartup = null;
     get('status').textContent = '正在录音，请发言。';
     advance.textContent = actionLabel();
     advance.disabled = false;
   };
-  session.onstart = started;
   session.onaudiostart = started;
   session.onresult = event => {
     if (recognition !== session) return;
@@ -134,6 +147,7 @@ function startRecognition() {
   session.onend = () => {
     if (recognition !== session) return;
     clearTimeout(startTimer);
+    retryStartup = null;
     clearTimeout(stopTimer);
     recognition = null;
     if (finishing) {
@@ -142,7 +156,7 @@ function startRecognition() {
       if (interim) transcript.push(interim);
       interim = '';
       retryUsed = true;
-      startRecognition();
+      startRecognition(true);
     } else {
       const blocked = error === 'not-allowed' || error === 'service-not-allowed';
       paused(blocked ? '麦克风权限被拒绝。请在 Safari 或 Chrome 中打开网页并允许麦克风。' : '录音已暂停，请点下方按钮继续。');
@@ -151,6 +165,7 @@ function startRecognition() {
   startTimer = setTimeout(() => {
     if (recognition !== session) return;
     recognition = null;
+    retryStartup = null;
     try { session.abort(); } catch {}
     paused('麦克风启动超时。如果你在 ChatGPT 里打开了网页，请用 Safari 或 Chrome 打开，允许麦克风后重试。');
   }, 10000);
@@ -159,6 +174,7 @@ function startRecognition() {
   } catch {
     clearTimeout(startTimer);
     recognition = null;
+    retryStartup = null;
     paused('无法启动麦克风，请在 Safari 或 Chrome 中打开后重试。');
   }
 }
@@ -179,6 +195,7 @@ get('setup').onsubmit = event => {
 };
 
 advance.onclick = () => {
+  if (retryStartup) return retryStartup();
   if (index >= names.length) {
     get('summaries').replaceChildren();
     get('results').hidden = true;
