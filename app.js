@@ -79,15 +79,55 @@ get('next').onclick = () => {
   if (index !== -1 && direction) stopTurn(nextSeat());
 };
 
-function extractHighlights(parts) {
-  const sentences = parts.flatMap(part => part.split(/[。！？；!?;\n]+/u))
-    .map(text => text.trim()).filter(Boolean);
-  const unique = [...new Set(sentences)];
-  const relevant = /建议|认为|支持|反对|怀疑|相信|组队|上车|任务|投票|因为|但是/u;
-  return unique.map((text, order) => ({text, order, score: Number(relevant.test(text))}))
-    .sort((a, b) => b.score - a.score || a.order - b.order)
-    .slice(0, 3).sort((a, b) => a.order - b.order)
-    .map(({text}) => text.length > 160 ? text.slice(0, 160) + '…' : text);
+function summarizeSpeech(parts) {
+  const seatNumbers = {一: '1', 二: '2', 两: '2', 三: '3', 四: '4', 五: '5',
+    六: '6', 七: '7', 八: '8', 九: '9', 十: '10'};
+  const seatPattern = '(?:10|[1-9]|[一二两三四五六七八九十])';
+  const seatReferences = '(?<![0-9])(' + seatPattern + '(?:号)?(?:\\s*[、和跟与及]\\s*'
+    + seatPattern + '(?:号)?)*号)(?![0-9])';
+  const nicknames = [...names].filter(name => name.length > 1).sort((a, b) => b.length - a.length)
+    .map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const references = new RegExp([seatReferences, ...nicknames].join('|'), 'gu');
+  const groups = new Map();
+  function add(label, value) {
+    if (!value) return;
+    if (!groups.has(label)) groups.set(label, new Set());
+    groups.get(label).add(value);
+  }
+
+  for (const part of parts) {
+    for (const clause of part.split(/[，,。！？；!?;]+/u)) {
+      const text = clause.trim();
+      const reason = text.match(/(?:主要是因为|因为|理由是|原因是)(.+)/u);
+      if (reason) add('给出的理由', reason[1].trim().replace(/^我(?:觉得|认为)\s*/u, ''));
+      const claim = reason ? text.slice(0, reason.index) : text;
+      for (const match of claim.matchAll(references)) {
+        const before = claim.slice(0, match.index);
+        const after = claim.slice(match.index + match[0].length);
+        const target = match[1] ? match[1].match(new RegExp(seatPattern, 'gu'))
+          .map(number => (seatNumbers[number] || number) + '号').join('、') : match[0];
+        if (/(?:不|没)(?:反对|怀疑|质疑)(?:让|由)?\s*$/u.test(before)) continue;
+        if (/不一定|不确定|不知道|不能判断|有没有|要不要|会不会/u.test(before + after)) {
+          add('暂未确定', target);
+        } else if (/(?:不太|不怎么|不|没|并不|暂不)(?:同意|支持|相信|信任|建议|推荐)\s*$/u.test(before)
+          || /(?:反对|不赞成)(?:让|由)?\s*$/u.test(before)
+          || /^\s*(?:别|不要|不适合|不能)\s*(?:上车|进队|组队)/u.test(after)) {
+          add('反对或保留', target);
+        } else if (/(?:怀疑|质疑|不看好)\s*$/u.test(before)
+          || /^\s*(?:有问题|有嫌疑|可疑|很可疑)/u.test(after)) {
+          add('质疑对象', target);
+        } else if (/(?:建议|提议|推荐|想让|可以让)(?:先|让|由|带)?\s*$/u.test(before)
+          && /^\s*(?:一起|优先|可以|先|来|去)?\s*(?:上车|组队|进队|做任务)/u.test(after)) {
+          add('建议上车', target);
+        } else if (/(?:支持|赞成|相信|信任|看好)\s*$/u.test(before)) {
+          add('倾向支持', target);
+        }
+      }
+      if (/(?:我)?(?:会|准备|打算|决定)(?:投)?赞成票/u.test(claim)) add('投票意向', '赞成');
+      if (/(?:我)?(?:会|准备|打算|决定)(?:投)?反对票/u.test(claim)) add('投票意向', '反对');
+    }
+  }
+  return [...groups].map(([label, values]) => label + '：' + [...values].join('；'));
 }
 
 function addSummary(name, parts) {
@@ -95,13 +135,20 @@ function addSummary(name, parts) {
   const heading = document.createElement('strong');
   heading.textContent = name;
   row.append(heading);
-  const highlights = extractHighlights(parts);
-  if (highlights.length) {
+  const highlights = summarizeSpeech(parts);
+  if (parts.length) {
     const list = document.createElement('ul');
     for (const text of highlights) {
       const item = document.createElement('li');
       item.textContent = text;
       list.append(item);
+    }
+    if (!highlights.length) {
+      const message = document.createElement('p');
+      message.textContent = '暂未提取到明确的队伍建议、立场或理由。';
+      row.append(message);
+    } else {
+      row.append(list);
     }
     const details = document.createElement('details');
     const label = document.createElement('summary');
@@ -110,7 +157,7 @@ function addSummary(name, parts) {
     full.className = 'full-transcript';
     full.textContent = parts.join('\n');
     details.append(label, full);
-    row.append(list, details);
+    row.append(details);
   } else {
     const empty = document.createElement('p');
     empty.textContent = '没有识别到发言。';
